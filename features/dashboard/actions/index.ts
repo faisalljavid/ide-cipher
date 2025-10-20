@@ -102,6 +102,7 @@ export const editProjectById = async (id: string, data: { title: string, descrip
             where: { id },
             data: data
         })
+        revalidatePath("/dashboard")
     } catch (error) {
         console.error(error)
     }
