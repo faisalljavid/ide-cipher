@@ -1,8 +1,10 @@
 import { EmptyState } from "@/components/ui/empty-state"
-import AddNewButton from "@/features/dashboard/actions/components/add-new-btn";
+import { deleteProjectById, duplicateProjectById, editProjectById, getAllPlaygroundForUser } from "@/features/dashboard/actions"
+import AddNewButton from "@/features/dashboard/actions/components/add-new-btn"
+import ProjectTable from "@/features/dashboard/actions/components/project-table"
 
-const Page = () => {
-    const playgrounds: any[] = []
+const Page = async () => {
+    const playgrounds = await getAllPlaygroundForUser()
 
     return (
         <div className="flex flex-col justify-start items-center min-h-screen mx-auto max-w-7xl px-4 py-10" >
@@ -14,10 +16,12 @@ const Page = () => {
                 {
                     playgrounds && playgrounds.length === 0 ? (<EmptyState title="No projects found"
                         description="Create a new project to get started" imageSrc="/empty-state.svg" />) : (
-                        // todo: add playground cards here
-                        <p>
-                            Playground Table
-                        </p>
+                        <ProjectTable
+                            projects={playgrounds || []}
+                            onDeleteProject={deleteProjectById}
+                            onUpdateProject={editProjectById}
+                            onDuplicateProject={duplicateProjectById}
+                        />
                     )
                 }
             </div>
