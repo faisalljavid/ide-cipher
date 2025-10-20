@@ -117,7 +117,7 @@ export const duplicateProjectById = async (id: string) => {
             throw new Error("Playground not found")
         }
 
-        const duplicatePlayground = await db.playground.create({
+        await db.playground.create({
             data: {
                 title: `${originalPlayground.title} (Copy)`,
                 description: originalPlayground.description,
@@ -126,9 +126,7 @@ export const duplicateProjectById = async (id: string) => {
             }
         })
         revalidatePath("/dashboard")
-        return duplicatePlayground
     } catch (error) {
         console.error(error)
-        return null
     }
 }
