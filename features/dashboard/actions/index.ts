@@ -21,6 +21,18 @@ export const createPlayground = async (data: {
     const { template, title, description } = data
     try {
         const user = await currentUser()
+
+        // Ensure user exists in database
+        await db.user.upsert({
+            where: { id: user?.id ?? DEV_USER_ID },
+            update: {},
+            create: {
+                id: user?.id ?? DEV_USER_ID,
+                email: user?.email ?? "dev@example.com",
+                name: user?.name ?? "Dev User",
+            }
+        })
+
         const playground = await db.playground.create({
             data: {
                 title,
@@ -29,9 +41,12 @@ export const createPlayground = async (data: {
                 userId: user?.id ?? DEV_USER_ID,
             }
         })
+
+        revalidatePath("/dashboard")
         return playground
 
     } catch (error) {
+        console.error("Error creating playground:", error)
         return null
     }
 }
@@ -54,13 +69,17 @@ export const getAllPlaygroundForUser = async () => {
                         isMarked: true
                     }
                 }
+            },
+            orderBy: {
+                createdAt: 'desc'
             }
         })
 
         return playground
 
     } catch (error) {
-        return null
+        console.error("Error fetching playgrounds:", error)
+        return []
     }
 }
 
