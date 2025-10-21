@@ -2,8 +2,6 @@
 
 import * as React from "react"
 import { ChevronRight, File, Folder, Plus, FilePlus, FolderPlus, MoreHorizontal, Trash2, Edit3, PlusIcon } from "lucide-react"
-
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import {
     Sidebar,
     SidebarContent,
@@ -384,7 +382,7 @@ const TemplateFileTree = ({
                     </SidebarGroupLabel>
 
                     <DropdownMenu>
-                        <DropdownMenuTrigger>
+                        <DropdownMenuTrigger asChild>
                             <SidebarGroupAction>
                                 <PlusIcon className="h-4 w-4" />
                             </SidebarGroupAction>
