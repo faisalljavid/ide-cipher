@@ -12,9 +12,17 @@ function ThemeToggle() {
     if (!mounted) return null
 
     return (
-        <div className="cursor-pointer" onClick={() => setTheme(theme === "dark" ? "light" : "dark")}>
+        <div
+            className="cursor-pointer p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+        >
             {
-                theme === "light" ? (<Moon className="size-5 text-black" />) : (<Sun className="size-5 text-white" />)
+                theme === "dark" ? (
+                    <Sun className="size-5 text-yellow-500 drop-shadow-md" />
+                ) : (
+                    <Moon className="size-5 text-slate-700 drop-shadow-sm" />
+                )
             }
         </div>
     )
