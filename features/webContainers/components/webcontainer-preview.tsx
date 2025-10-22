@@ -44,6 +44,12 @@ const WebContainerPreview = ({
     // Ref to access terminal methods
     const terminalRef = useRef<any>(null);
 
+    // Ref to track if setup has been initiated for this instance
+    const setupInitiatedRef = useRef<WebContainer | null>(null);
+
+    // Ref to track the running server process
+    const serverProcessRef = useRef<any>(null);
+
     // Reset setup state when forceResetup changes
     useEffect(() => {
         if (forceResetup) {
@@ -51,6 +57,7 @@ const WebContainerPreview = ({
             setIsSetupInProgress(false);
             setPreviewUrl("");
             setCurrentStep(0);
+            setupInitiatedRef.current = null;
             setLoadingState({
                 transforming: false,
                 mounting: false,
@@ -64,10 +71,12 @@ const WebContainerPreview = ({
 
     useEffect(() => {
         async function setupContainer() {
-            // Don't run setup if it's already complete or in progress
-            if (!instance || isSetupComplete || isSetupInProgress) return;
+            // Don't run setup if it's already complete, in progress, or has been initiated for this instance
+            if (!instance || isSetupComplete || isSetupInProgress || setupInitiatedRef.current === instance) return;
 
             try {
+                // Mark this instance as having setup initiated
+                setupInitiatedRef.current = instance;
                 setIsSetupInProgress(true);
                 setSetupError(null);
 
@@ -175,11 +184,22 @@ const WebContainerPreview = ({
 
                 // Step 4: Start the server
 
+                // Kill any existing server process before starting a new one
+                if (serverProcessRef.current) {
+                    try {
+                        serverProcessRef.current.kill();
+                        serverProcessRef.current = null;
+                    } catch (e) {
+                        console.error("Failed to kill existing process:", e);
+                    }
+                }
+
                 if (terminalRef.current?.writeToTerminal) {
                     terminalRef.current.writeToTerminal("🚀  Starting development server...\r\n");
                 }
 
                 const startProcess = await instance.spawn("npm", ["run", "start"]);
+                serverProcessRef.current = startProcess;
 
                 // Listen for server ready event
                 instance.on("server-ready", (port: number, url: string) => {
@@ -218,13 +238,20 @@ const WebContainerPreview = ({
         }
 
         setupContainer();
-    }, [instance, templateData, isSetupComplete, isSetupInProgress])
+    }, [instance, isSetupComplete, isSetupInProgress])
 
     // Cleanup function to prevent memory leaks
     useEffect(() => {
         return () => {
-            // Don't kill processes or cleanup when component unmounts
-            // The WebContainer should persist across component re-mounts
+            // Kill the server process on unmount to prevent port conflicts
+            if (serverProcessRef.current) {
+                try {
+                    serverProcessRef.current.kill();
+                    serverProcessRef.current = null;
+                } catch (e) {
+                    console.error("Failed to kill server process on cleanup:", e);
+                }
+            }
         }
     }, [])
 
