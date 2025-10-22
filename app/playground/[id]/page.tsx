@@ -25,6 +25,14 @@ import { findFilePath } from '@/features/playground/libs'
 const page = () => {
     const { id } = useParams<{ id: string }>()
     const [isPreviewVisible, setIsPreviewVisible] = useState(true)
+    const [autoSaveEnabled, setAutoSaveEnabled] = useState(() => {
+        // Load auto-save preference from localStorage
+        if (typeof window !== 'undefined') {
+            const saved = localStorage.getItem('autoSaveEnabled');
+            return saved !== null ? JSON.parse(saved) : true;
+        }
+        return true;
+    })
     const { playgroundData, templateData, isLoading, error, saveTemplateData } = usePlayground(id)
     const {
         activeFileId,
@@ -67,6 +75,11 @@ const page = () => {
             setTemplateData(templateData)
         }
     }, [templateData, setTemplateData, openFiles.length])
+
+    // Save auto-save preference to localStorage
+    useEffect(() => {
+        localStorage.setItem('autoSaveEnabled', JSON.stringify(autoSaveEnabled));
+    }, [autoSaveEnabled])
 
 
     // Create wrapper functions that pass saveTemplateData
@@ -242,6 +255,29 @@ const page = () => {
         }
     }
 
+    // Auto-save effect with debouncing
+    useEffect(() => {
+        if (!autoSaveEnabled) return;
+
+        const unsavedFiles = openFiles.filter((f) => f.hasUnsavedChanges);
+        if (unsavedFiles.length === 0) return;
+
+        // Debounce auto-save by 2 seconds
+        const timeoutId = setTimeout(async () => {
+            try {
+                await Promise.all(unsavedFiles.map((f) => handleSave(f.id)));
+                toast.success("Auto-saved", {
+                    duration: 1500,
+                    icon: "💾",
+                });
+            } catch (error) {
+                console.error("Auto-save failed:", error);
+            }
+        }, 2000);
+
+        return () => clearTimeout(timeoutId);
+    }, [openFiles, autoSaveEnabled, handleSave]);
+
     // Add event to save file by click ctrl + s
     React.useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
@@ -325,6 +361,7 @@ const page = () => {
                                 <p className="text-xs text-muted-foreground">
                                     {openFiles.length} File(s) open
                                     {hasUnsavedChanges && " • Unsaved changes"}
+                                    {autoSaveEnabled && " • Auto-save: ON"}
                                 </p>
                             </div>
                             <div className='flex items-center gap-1'>
@@ -369,6 +406,16 @@ const page = () => {
                                             onClick={() => setIsPreviewVisible(!isPreviewVisible)}
                                         >
                                             {isPreviewVisible ? "Hide" : "Show"} Preview
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            onClick={() => {
+                                                setAutoSaveEnabled(!autoSaveEnabled);
+                                                toast.info(
+                                                    autoSaveEnabled ? "Auto-save disabled" : "Auto-save enabled"
+                                                );
+                                            }}
+                                        >
+                                            {autoSaveEnabled ? "Disable" : "Enable"} Auto-save
                                         </DropdownMenuItem>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem onClick={closeAllFiles}>
