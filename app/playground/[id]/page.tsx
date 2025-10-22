@@ -10,11 +10,14 @@ import { useFileExplorer } from '@/features/playground/hooks/useFileExplorer'
 import { Tooltip, TooltipProvider, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { Button } from '@/components/ui/button'
-import { FileText, Save, Settings, X } from 'lucide-react'
+import { AlertCircle, FileText, Save, Settings, X } from 'lucide-react'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { TemplateFile } from '@/features/playground/libs/path-to-json'
 import PlaygroundEditor from '@/features/playground/components/playground-editor'
+import { useWebContainer } from '@/features/webContainers/hooks/useWebContainer'
+import WebContainerPreview from '@/features/webContainers/components/webcontainer-preview'
+import LoadingStep from '@/components/ui/loader'
 
 
 const page = () => {
@@ -41,6 +44,16 @@ const page = () => {
         setOpenFiles,
     } = useFileExplorer()
 
+    const {
+        serverUrl,
+        isLoading: containerLoading,
+        error: containerError,
+        instance,
+        writeFileSync
+
+        // @ts-ignoregnore
+    } = useWebContainer({ templateData })
+
     useEffect(() => {
         setPlaygroundId(id)
     }, [id, setPlaygroundId])
@@ -55,6 +68,48 @@ const page = () => {
     const hasUnsavedChanges = openFiles.some((file) => file.hasUnsavedChanges)
     const handleFileSelect = (file: TemplateFile) => {
         openFile(file)
+    }
+
+    // Error state
+    if (error) {
+        return (
+            <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)] p-4">
+                <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
+                <h2 className="text-xl font-semibold text-red-600 mb-2">
+                    Something went wrong
+                </h2>
+                <p className="text-gray-600 mb-4">{error}</p>
+                <Button onClick={() => window.location.reload()} variant="destructive">
+                    Try Again
+                </Button>
+            </div>
+        );
+    }
+
+    // Loading state
+    if (isLoading) {
+        return (
+            <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)] p-4">
+                <div className="w-full max-w-md p-6 rounded-lg shadow-sm border">
+                    <h2 className="text-xl font-semibold mb-6 text-center">
+                        Loading Playground
+                    </h2>
+                    <div className="mb-8">
+                        <LoadingStep
+                            currentStep={1}
+                            step={1}
+                            label="Loading playground data"
+                        />
+                        <LoadingStep
+                            currentStep={2}
+                            step={2}
+                            label="Setting up environment"
+                        />
+                        <LoadingStep currentStep={3} step={3} label="Ready to code" />
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     return (
@@ -204,6 +259,26 @@ const page = () => {
                                                 suggestionPosition={null}
                                             />
                                         </ResizablePanel>
+
+                                        {
+                                            isPreviewVisible && (
+                                                <>
+                                                    <ResizableHandle />
+                                                    <ResizablePanel defaultSize={50}>
+                                                        <WebContainerPreview
+                                                            templateData={templateData!}
+                                                            instance={instance}
+                                                            writeFileSync={writeFileSync}
+                                                            isLoading={containerLoading}
+                                                            error={containerError}
+                                                            serverUrl={serverUrl || ""}
+                                                            forceResetup={false}
+                                                        />
+                                                    </ResizablePanel>
+                                                </>
+                                            )
+                                        }
+
                                     </ResizablePanelGroup>
                                 </div>
 
