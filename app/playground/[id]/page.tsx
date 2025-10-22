@@ -22,7 +22,7 @@ import { toast } from 'sonner'
 import { findFilePath } from '@/features/playground/libs'
 
 
-const page = () => {
+export default function Page() {
     const { id } = useParams<{ id: string }>()
     const [isPreviewVisible, setIsPreviewVisible] = useState(true)
     const [autoSaveEnabled, setAutoSaveEnabled] = useState(() => {
@@ -39,7 +39,6 @@ const page = () => {
         closeAllFiles,
         openFile,
         closeFile,
-        editorContent,
         updateFileContent,
         handleAddFile,
         handleAddFolder,
@@ -61,7 +60,7 @@ const page = () => {
         instance,
         writeFileSync
 
-        // @ts-ignoregnore
+        // @ts-expect-error - WebContainer types are not fully compatible
     } = useWebContainer({ templateData })
 
     const lastSyncedContent = useRef<Map<string, string>>(new Map())
@@ -179,7 +178,7 @@ const page = () => {
 
                 const updatedTemplateData = JSON.parse(JSON.stringify(latestTemplateData))
 
-                const updateFileContent = (items: any[]): any[] =>
+                const updateFileContent = (items: (TemplateFile | TemplateFolder)[]): (TemplateFile | TemplateFolder)[] =>
                     items.map((item) => {
                         if ("folderName" in item) {
                             return { ...item, items: updateFileContent(item.items) };
@@ -548,5 +547,3 @@ const page = () => {
         </TooltipProvider >
     )
 }
-
-export default page

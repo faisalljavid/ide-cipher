@@ -1,6 +1,5 @@
 import { Header } from "@/features/home/components/header"
 import React from "react"
-import { Footer } from "react-day-picker"
 
 export default function HomeLayout({
     children
