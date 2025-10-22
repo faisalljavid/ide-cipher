@@ -15,7 +15,7 @@ type TemplateSelectionModalProps = {
     onClose: () => void
     onSubmit: (data: {
         title: string;
-        template: "REACT";
+        template: "REACT" | "EXPRESS";
         description?: string;
     }) => void
 }
@@ -42,6 +42,18 @@ const templates: TemplateOption[] = [
         tags: ["UI", "Frontend", "JavaScript"],
         features: ["Component-Based", "Virtual DOM", "JSX Support"],
         category: "frontend",
+    },
+    {
+        id: "express",
+        name: "Express",
+        description:
+            "Fast, unopinionated, minimalist web framework for Node.js to build APIs and web applications",
+        icon: "/expressjs-icon.svg",
+        color: "#000000",
+        popularity: 4,
+        tags: ["Node.js", "API", "Backend"],
+        features: ["Middleware", "Routing", "HTTP Utilities"],
+        category: "backend",
     },
 ]
 
@@ -79,20 +91,33 @@ const TemplateSelectionModal = ({ isOpen, onClose, onSubmit }: TemplateSelection
     }
 
     const handleCreateProject = () => {
-        const template = templates.find((t) => t.id === selectedTemplate)
-        if (template && projectName.trim()) {
+        if (selectedTemplate) {
+            const templateMap: Record<
+                string,
+                "REACT" | "EXPRESS"
+            > = {
+                react: "REACT",
+                express: "EXPRESS",
+            };
+
+            const template = templates.find((t) => t.id === selectedTemplate);
             onSubmit({
-                title: projectName.trim(),
-                template: "REACT",
-                description: `A ${template.name} playground`
-            })
+                title: projectName || `New ${template?.name} Project`,
+                template: templateMap[selectedTemplate] || "REACT",
+                description: template?.description,
+            });
+
+            console.log(
+                `Creating ${projectName || "new project"} with template: ${template?.name
+                }`
+            );
+            onClose();
+            // Reset state for next time
+            setStep("select");
+            setSelectedTemplate(null);
+            setProjectName("");
         }
-        onClose()
-        // Reset state for next time
-        setStep("select")
-        setSelectedTemplate(null)
-        setProjectName("")
-    }
+    };
 
     const renderStars = (count: number) => {
         return Array(5).fill(0).map((_, i) => (

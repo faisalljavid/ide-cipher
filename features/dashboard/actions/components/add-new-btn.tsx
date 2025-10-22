@@ -14,7 +14,7 @@ const AddNewButton = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<
     {
       title: string;
-      template: "REACT";
+      template: "REACT" | "EXPRESS";
       description?: string;
     } | null>(null)
 
@@ -22,7 +22,7 @@ const AddNewButton = () => {
 
   const handleSubmit = async (data: {
     title: string;
-    template: "REACT";
+    template: "REACT" | "EXPRESS";
     description?: string;
   }) => {
     try {

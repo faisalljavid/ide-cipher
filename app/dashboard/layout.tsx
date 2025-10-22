@@ -8,7 +8,8 @@ export default async function DashboardLayout(
     const playgroundData = await getAllPlaygroundForUser();
 
     const technologyIconMap: Record<string, string> = {
-        REACT: "Zap"
+        REACT: "Zap",
+        EXPRESS: "Database",
     }
 
     const formattedPlaygroundData = playgroundData?.map((playground) => ({
