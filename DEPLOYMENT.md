@@ -97,10 +97,22 @@ The `vercel.json` file includes:
 - Verify CORS headers are properly configured
 - Review function logs in Vercel dashboard
 
+### API Route 500 Errors
+If you get "Failed to generate template" errors:
+- This was caused by file system writes in serverless functions
+- **Already fixed**: API routes now process templates in-memory
+- See `VERCEL_TROUBLESHOOTING.md` for detailed explanation
+
+### Database Connection
+- Ensure MongoDB Atlas allows connections from Vercel
+- Whitelist IP: `0.0.0.0/0` (all IPs) in MongoDB Atlas Network Access
+- Or use Vercel's static IP addresses (available in Pro/Enterprise)
+
 ### Performance
 - The project uses Turbopack for faster builds
 - Static pages are pre-rendered where possible
 - WebContainer API is loaded dynamically on the client side
+- Templates are processed in-memory (Vercel-compatible)
 
 ## Support
 
