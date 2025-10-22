@@ -6,8 +6,17 @@ import { transformToWebContainerFormat } from "../hooks/transformer"
 import { CheckCircle, Loader2, XCircle } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 import { WebContainer } from "@webcontainer/api"
-import TerminalComponent from "./terminal";
+import dynamic from "next/dynamic";
 
+// Dynamically import Terminal component with SSR disabled
+const TerminalComponent = dynamic(() => import("./terminal"), {
+    ssr: false,
+    loading: () => (
+        <div className="flex items-center justify-center h-full bg-background">
+            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        </div>
+    ),
+})
 interface WebContainerPreviewProps {
     templateData: TemplateFolder
     serverUrl: string
