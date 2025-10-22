@@ -156,7 +156,7 @@ const page = () => {
     }
 
     const handleSave = useCallback(
-        async (fileId?: string) => {
+        async (fileId?: string, silent = false) => {
             const targetFileId = fileId || activeFileId;
             if (!targetFileId) return;
 
@@ -169,9 +169,11 @@ const page = () => {
             try {
                 const filePath = findFilePath(fileToSave, latestTemplateData);
                 if (!filePath) {
-                    toast.error(
-                        `Could not find path for file: ${fileToSave.filename}.${fileToSave.fileExtension}`
-                    );
+                    if (!silent) {
+                        toast.error(
+                            `Could not find path for file: ${fileToSave.filename}.${fileToSave.fileExtension}`
+                        );
+                    }
                     return;
                 }
 
@@ -202,8 +204,8 @@ const page = () => {
                     }
                 }
 
-                // Use saveTemplateData to persist changes
-                await saveTemplateData(updatedTemplateData);
+                // Use saveTemplateData to persist changes (pass silent parameter)
+                await saveTemplateData(updatedTemplateData, silent);
                 setTemplateData(updatedTemplateData);
 
                 // Update open files
@@ -220,15 +222,20 @@ const page = () => {
 
                 setOpenFiles(updatedOpenFiles)
 
-                toast.success(
-                    `Saved ${fileToSave.filename}.${fileToSave.fileExtension}`
-                )
+                // Only show toast if not silent (manual save)
+                if (!silent) {
+                    toast.success(
+                        `Saved ${fileToSave.filename}.${fileToSave.fileExtension}`
+                    )
+                }
 
             } catch (error) {
                 console.error("Error saving file:", error);
-                toast.error(
-                    `Failed to save ${fileToSave.filename}.${fileToSave.fileExtension}`
-                );
+                if (!silent) {
+                    toast.error(
+                        `Failed to save ${fileToSave.filename}.${fileToSave.fileExtension}`
+                    );
+                }
                 throw error;
             }
         }, [activeFileId,
@@ -255,7 +262,7 @@ const page = () => {
         }
     }
 
-    // Auto-save effect with debouncing
+    // Auto-save effect with debouncing (silent - no toast)
     useEffect(() => {
         if (!autoSaveEnabled) return;
 
@@ -265,13 +272,13 @@ const page = () => {
         // Debounce auto-save by 2 seconds
         const timeoutId = setTimeout(async () => {
             try {
-                await Promise.all(unsavedFiles.map((f) => handleSave(f.id)));
-                toast.success("Auto-saved", {
-                    duration: 1500,
-                    icon: "💾",
-                });
+                // Silent auto-save (no toast notifications)
+                await Promise.all(unsavedFiles.map((f) => handleSave(f.id, true)));
+                console.log('✅ Auto-saved', unsavedFiles.length, 'file(s) silently');
             } catch (error) {
                 console.error("Auto-save failed:", error);
+                // Only show toast on error
+                toast.error("Auto-save failed");
             }
         }, 2000);
 
