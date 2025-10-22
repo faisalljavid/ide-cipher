@@ -377,7 +377,7 @@ const page = () => {
                                         <Button
                                             size="sm"
                                             variant="outline"
-                                            onClick={() => handleSave}
+                                            onClick={() => handleSave()}
                                             disabled={!activeFile || !activeFile.hasUnsavedChanges}
                                         >
                                             <Save className="h-4 w-4" />
