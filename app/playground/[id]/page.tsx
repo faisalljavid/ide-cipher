@@ -509,24 +509,22 @@ const page = () => {
                                             />
                                         </ResizablePanel>
 
-                                        {
-                                            isPreviewVisible && (
-                                                <>
-                                                    <ResizableHandle />
-                                                    <ResizablePanel defaultSize={50}>
-                                                        <WebContainerPreview
-                                                            templateData={templateData!}
-                                                            instance={instance}
-                                                            writeFileSync={writeFileSync}
-                                                            isLoading={containerLoading}
-                                                            error={containerError}
-                                                            serverUrl={serverUrl || ""}
-                                                            forceResetup={false}
-                                                        />
-                                                    </ResizablePanel>
-                                                </>
-                                            )
-                                        }
+                                        {/* Keep preview mounted but hide it when not visible */}
+                                        <ResizableHandle className={isPreviewVisible ? "" : "hidden"} />
+                                        <ResizablePanel
+                                            defaultSize={50}
+                                            className={isPreviewVisible ? "" : "hidden"}
+                                        >
+                                            <WebContainerPreview
+                                                templateData={templateData!}
+                                                instance={instance}
+                                                writeFileSync={writeFileSync}
+                                                isLoading={containerLoading}
+                                                error={containerError}
+                                                serverUrl={serverUrl || ""}
+                                                forceResetup={false}
+                                            />
+                                        </ResizablePanel>
 
                                     </ResizablePanelGroup>
                                 </div>
