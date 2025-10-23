@@ -1,5 +1,7 @@
 import Link from "next/link";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
+import Image from "next/image";
+import { ThemeToggle } from "@/components/ui/theme-toggle"
+import UserButton from "@/features/auth/components/user-button"
 
 export function Header() {
     return (
@@ -27,7 +29,7 @@ export function Header() {
                             <div className="relative z-10 flex items-center justify-between w-full gap-2">
                                 <div className="flex-1"></div>
 
-                                <div className="flex items-center justify-center">
+                                <div className="flex items-center gap-6 justify-center">
                                     <Link
                                         href="/"
                                         className="flex items-center gap-2 justify-center"
@@ -41,6 +43,7 @@ export function Header() {
                                 {/* Right side items */}
                                 <div className="hidden sm:flex items-center gap-3 flex-1 justify-end">
                                     <ThemeToggle />
+                                    <UserButton />
                                 </div>
                             </div>
                         </div>

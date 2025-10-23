@@ -3,6 +3,8 @@ import { Poppins } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
+import { auth } from "@/auth";
+import { SessionProvider } from "next-auth/react";
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -19,23 +21,28 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+
+  const session = await auth()
+
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body
-        className={` ${poppins.className} antialiased`}
-      >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
+    <SessionProvider session={session}>
+      <html lang="en" suppressHydrationWarning>
+        <body
+          className={` ${poppins.className} antialiased`}
         >
-          <div className="flex flex-col min-h-screen">
-            <Toaster />
-            <div className="flex-1">{children}</div>
-          </div>
-        </ThemeProvider>
-      </body>
-    </html>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <div className="flex flex-col min-h-screen">
+              <Toaster />
+              <div className="flex-1">{children}</div>
+            </div>
+          </ThemeProvider>
+        </body>
+      </html>
+    </SessionProvider>
   )
 }

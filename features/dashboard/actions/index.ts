@@ -3,15 +3,9 @@
 import { db } from "@/lib/db"
 import { Templates } from "@/lib/generated/prisma/client"
 import { revalidatePath } from "next/cache"
+import { currentUser } from "@/features/auth/actions"
 
-// Temporarily adding "fake auth"
-const DEV_USER_ID = "dev-user-id"
-
-type DevUser = { id: string; email?: string; name?: string }
-
-export async function currentUser(): Promise<DevUser | null> {
-    return { id: DEV_USER_ID, email: "dev@example.com" }
-}
+// Using real auth via NextAuth (see features/auth/actions)
 
 export const createPlayground = async (data: {
     title: string,
@@ -21,24 +15,16 @@ export const createPlayground = async (data: {
     const { template, title, description } = data
     try {
         const user = await currentUser()
-
-        // Ensure user exists in database
-        await db.user.upsert({
-            where: { id: user?.id ?? DEV_USER_ID },
-            update: {},
-            create: {
-                id: user?.id ?? DEV_USER_ID,
-                email: user?.email ?? "dev@example.com",
-                name: user?.name ?? "Dev User",
-            }
-        })
+        if (!user?.id) {
+            throw new Error("Unauthorized")
+        }
 
         const playground = await db.playground.create({
             data: {
                 title,
                 description,
                 template,
-                userId: user?.id ?? DEV_USER_ID,
+                userId: user.id,
             }
         })
 
@@ -53,18 +39,21 @@ export const createPlayground = async (data: {
 
 export const getAllPlaygroundForUser = async () => {
     const user = await currentUser()
+    if (!user?.id) {
+        return []
+    }
 
     try {
         // Disable Prisma query caching by using a unique timestamp
         const playground = await db.playground.findMany({
             where: {
-                userId: user?.id,
+                userId: user.id,
             },
             include: {
                 user: true,
                 starMarks: {
                     where: {
-                        userId: user?.id,
+                        userId: user.id,
                     },
                     select: {
                         isMarked: true
