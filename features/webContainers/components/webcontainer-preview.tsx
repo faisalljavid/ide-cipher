@@ -111,7 +111,22 @@ const WebContainerPreview = ({
 
 
 
-                // Step 2: Mount files
+                // Step 2: Clean workspace and mount files
+
+                if (terminalRef.current?.writeToTerminal) {
+                    terminalRef.current.writeToTerminal("🧹  Cleaning workspace...\r\n");
+                }
+
+                try {
+                    // Remove all files in the root to avoid leaking prior template
+                    const entries = await instance.fs.readdir('/')
+                    for (const name of entries) {
+                        if (name === 'home' || name === 'etc' || name === 'proc') continue
+                        try { await instance.fs.rm(`/${name}`, { recursive: true }) } catch { }
+                    }
+                } catch (e) {
+                    // Ignore cleanup errors
+                }
 
                 if (terminalRef.current?.writeToTerminal) {
                     terminalRef.current.writeToTerminal("📁  Mounting files to WebContainer...\r\n");

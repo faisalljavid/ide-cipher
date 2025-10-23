@@ -19,11 +19,18 @@ export const createPlayground = async (data: {
             throw new Error("Unauthorized")
         }
 
+        // Normalize template value defensively
+        const normalizedTemplate: Templates =
+            (typeof template === 'string'
+                ? (template.toUpperCase() as Templates)
+                : template)
+            || 'REACT'
+
         const playground = await db.playground.create({
             data: {
                 title,
                 description,
-                template,
+                template: normalizedTemplate,
                 userId: user.id,
             }
         })

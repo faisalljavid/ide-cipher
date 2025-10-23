@@ -15,10 +15,6 @@ interface UseWebContainerReturn {
     destroy: () => void;
 }
 
-// Global WebContainer instance cache (singleton pattern)
-let globalWebContainerInstance: WebContainer | null = null;
-let bootPromise: Promise<WebContainer> | null = null;
-
 export const useWebContainer = ({ templateData }: UseWebContainerProps): UseWebContainerReturn => {
     const [serverUrl, setServerUrl] = useState<string | null>(null)
     const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -31,43 +27,13 @@ export const useWebContainer = ({ templateData }: UseWebContainerProps): UseWebC
 
         async function initializeWebContainer() {
             try {
-                // Use cached instance if available
-                if (globalWebContainerInstance) {
-                    console.log('Reusing cached WebContainer instance');
-                    if (mounted) {
-                        setInstance(globalWebContainerInstance);
-                        setIsLoading(false);
-                    }
-                    return;
-                }
-
-                // If boot is already in progress, wait for it
-                if (bootPromise) {
-                    console.log('Waiting for existing boot process...');
-                    const webcontainerInstance = await bootPromise;
-                    if (mounted) {
-                        setInstance(webcontainerInstance);
-                        setIsLoading(false);
-                    }
-                    return;
-                }
-
-                // Boot new instance
-                console.log('Booting new WebContainer instance...');
-                bootPromise = WebContainer.boot();
-                const webcontainerInstance = await bootPromise;
-
-                // Cache the instance
-                globalWebContainerInstance = webcontainerInstance;
-                bootPromise = null;
-
+                setIsLoading(true)
+                const webcontainerInstance = await WebContainer.boot();
                 if (!mounted) return
-
                 setInstance(webcontainerInstance)
                 setIsLoading(false)
             } catch (err) {
                 console.error('Failed to initialize WebContainer:', err)
-                bootPromise = null;
                 if (mounted) {
                     setError(err instanceof Error ? err.message : 'Failed to initialize WebContainer')
                     setIsLoading(false)
@@ -79,9 +45,21 @@ export const useWebContainer = ({ templateData }: UseWebContainerProps): UseWebC
 
         return () => {
             mounted = false
-            // Don't teardown the global instance, keep it cached
         }
     }, [])
+
+    // Teardown the instance on unmount or when instance changes
+    useEffect(() => {
+        return () => {
+            if (instance) {
+                try {
+                    instance.teardown()
+                } catch (e) {
+                    console.error('Error tearing down WebContainer:', e)
+                }
+            }
+        }
+    }, [instance])
 
     const writeFileSync = useCallback(async (path: string, content: string): Promise<void> => {
         if (!instance) {

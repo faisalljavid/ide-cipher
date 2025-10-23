@@ -1,4 +1,4 @@
 export const templatePaths = {
-    REACT: '/starters/react',
-    EXPRESS: '/starters/express-simple',
+    REACT: 'starters/react',
+    EXPRESS: 'starters/express-simple',
 }
