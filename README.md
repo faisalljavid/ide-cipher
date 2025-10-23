@@ -178,19 +178,17 @@ The application uses Prisma with MongoDB. Key models:
 ## 📝 Available Templates
 
 ### React
-- Basic React setup with React 18
-- Pre-configured with react-scripts
-- Includes basic component structure
+- Modern React setup with Vite
+- Pre-configured with hot reload
+- Includes basic component structure and styling
+- Ready-to-run development environment
 
-### React TypeScript
-- TypeScript-enabled React project
-- Type-safe development
-- Modern React patterns
-
-### Express (Coming Soon)
-- Node.js server with Express
+### Express
+- Node.js server with Express.js
 - RESTful API template
+- Static file serving
 - Middleware configuration
+- Simple HTML pages with CSS
 
 ## 🔧 Scripts
 
@@ -219,9 +217,9 @@ This project is licensed under the MIT License.
 
 The following features are planned for future releases:
 
-1. **Authentication** - User authentication and authorization system for secure access
-2. **Editor Theme Change** - Customizable editor themes (light/dark, VSCode themes, etc.)
-3. **Autosave Feature** - Automatic saving of changes with configurable intervals
+1. **Editor Theme Change** - Customizable editor themes (light/dark, VSCode themes, etc.)
+2. **Project Sharing** - Share playgrounds with public URLs and embed codes
+3. **Custom Domains** - Deploy playgrounds to custom domains
 
 ## 🙏 Acknowledgments
 
